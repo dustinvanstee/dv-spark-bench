@@ -1,0 +1,27 @@
+name := "dv-spark-bench"
+version := "1.0"
+organization := "dv.sparkbench"
+scalaVersion := "2.10.5"
+
+libraryDependencies += "org.apache.spark" %% "spark-core" % "1.6.2" % "provided"
+libraryDependencies += "org.apache.spark" %% "spark-mllib" % "1.6.2"
+libraryDependencies += "org.apache.spark" %% "spark-sql" % "1.6.2"
+
+
+
+
+
+   //libraryDependencies ++= Seq(
+    //  "org.apache.spark" %% "spark-core" % "0.8.0-incubating" % "provided",
+    //  "org.apache.hadoop" % "hadoop-client" % "2.0.0-cdh4.4.0" % "provided"
+    //)
+
+
+ //"org.apache.spark" %% "spark-core" % "1.3.1" % "provided",
+ // "org.apache.spark" %% "spark-sql" % "1.3.1",
+ // "org.apache.spark" %% "spark-hive" % "1.3.1",
+ // "org.apache.spark" %% "spark-streaming" % "1.3.1",
+ // "org.apache.spark" %% "spark-streaming-kafka" % "1.3.1",
+ // "org.apache.spark" %% "spark-streaming-flume" % "1.3.1",
+ // "org.apache.spark" %% "spark-mllib" % "1.3.1",
+
