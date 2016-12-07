@@ -1,7 +1,7 @@
 name := "dv-spark-bench"
 version := "1.0"
 organization := "dv.sparkbench"
-scalaVersion := "2.10.5"
+scalaVersion := "2.10.4"
 
 //libraryDependencies += "org.apache.hadoop" %% "hadoop-common" % "2.2.0" % "provided"
 libraryDependencies += "org.apache.spark" %% "spark-core" % "1.6.0" % "provided"
@@ -31,7 +31,7 @@ assemblyMergeStrategy in assembly := {
   case PathList("javax", "xml", xs @ _*)         => MergeStrategy.first
   case PathList("com", "google", xs @ _*)         => MergeStrategy.first
   case PathList("com", "esotericsoftware", xs @ _*)         => MergeStrategy.first
-
+  case PathList("scala", xs @ _*) => MergeStrategy.discard
   case PathList(ps @ _*) if ps.last endsWith ".html" => MergeStrategy.first
   case "application.conf"                            => MergeStrategy.concat
   case "unwanted.txt"                                => MergeStrategy.discard
@@ -40,6 +40,7 @@ assemblyMergeStrategy in assembly := {
     oldStrategy(x)
 }
 
+assemblyOption in assembly := (assemblyOption in assembly).value.copy(includeScala = false)
 
    //libraryDependencies ++= Seq(
     //  "org.apache.spark" %% "spark-core" % "0.8.0-incubating" % "provided",
