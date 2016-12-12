@@ -31,7 +31,6 @@ assemblyMergeStrategy in assembly := {
   case PathList("javax", "xml", xs @ _*)         => MergeStrategy.first
   case PathList("com", "google", xs @ _*)         => MergeStrategy.first
   case PathList("com", "esotericsoftware", xs @ _*)         => MergeStrategy.first
-  case PathList("scala", xs @ _*) => MergeStrategy.discard
   case PathList(ps @ _*) if ps.last endsWith ".html" => MergeStrategy.first
   case "application.conf"                            => MergeStrategy.concat
   case "unwanted.txt"                                => MergeStrategy.discard
@@ -39,6 +38,9 @@ assemblyMergeStrategy in assembly := {
     val oldStrategy = (assemblyMergeStrategy in assembly).value
     oldStrategy(x)
 }
+
+
+  //case PathList("scala", xs @ _*) => MergeStrategy.discard
 
 assemblyOption in assembly := (assemblyOption in assembly).value.copy(includeScala = false)
 

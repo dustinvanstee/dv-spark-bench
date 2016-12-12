@@ -11,7 +11,7 @@ object utils {
       (result, delta)
   }
 
-  case class linearSettings(numExamples:Integer, numFeatures : Integer, epsilon : Double, numPartitions : Integer, intercept : Double)
+  case class linearSettings(numExamples:Integer, numFeatures : Integer, epsilon : Double, numPartitions : Integer, intercept : Double, iterations : Integer)
 
 
 }
