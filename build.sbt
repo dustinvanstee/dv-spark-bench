@@ -3,11 +3,12 @@ version := "1.0"
 organization := "dv.sparkbench"
 scalaVersion := "2.10.4"
 
-//libraryDependencies += "org.apache.hadoop" %% "hadoop-common" % "2.2.0" % "provided"
+// Note the use of the %% vs % sign.
+// %% appends scala version while % does not
 libraryDependencies += "org.apache.spark" %% "spark-core" % "1.6.0" % "provided"
 libraryDependencies += "org.apache.spark" %% "spark-mllib" % "1.6.0" % "provided"
 libraryDependencies += "org.apache.spark" %% "spark-sql" % "1.6.0" % "provided"
-
+libraryDependencies += "org.apache.hadoop" % "hadoop-client" % "2.3.0" % "provided"
 
 //resolvers ++= Seq(
 //  "JBoss Repository" at "http://repository.jboss.org/nexus/content/repositories/releases/",
@@ -26,6 +27,7 @@ libraryDependencies += "org.apache.spark" %% "spark-sql" % "1.6.0" % "provided"
 //)
 
 assemblyMergeStrategy in assembly := {
+  case PathList("org", "apache", "hadoop", xs @ _*)         => MergeStrategy.first
   case PathList("org", "apache", "spark", xs @ _*)         => MergeStrategy.first
   case PathList("org", "apache", xs @ _*)         => MergeStrategy.first
   case PathList("javax", "xml", xs @ _*)         => MergeStrategy.first
