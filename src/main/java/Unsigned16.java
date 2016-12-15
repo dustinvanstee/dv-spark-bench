@@ -40,6 +40,10 @@ public class Unsigned16 {
     lo8 = l;
   }
 
+  public Unsigned16(long l, long m) {
+    hi8 = l;
+    lo8 = m;
+  }
   public Unsigned16(Unsigned16 other) {
     hi8 = other.hi8;
     lo8 = other.lo8;

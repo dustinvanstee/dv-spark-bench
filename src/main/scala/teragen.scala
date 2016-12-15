@@ -70,26 +70,37 @@ object teragen {
             val rowBytes: Array[Byte] = new Array[Byte](TeraInputFormat.RECORD_LEN)
             val key = new Array[Byte](TeraInputFormat.KEY_LEN)
             val value = new Array[Byte](TeraInputFormat.VALUE_LEN)
+            //val a = scala.util.Random
+
             Iterator.tabulate(recordsPerPartition.toInt) { offset =>
+
                 Random16.nextRand(rand)
+                //val rand = new Unsigned16(recs, recs)
                 generateRecord(rowBytes, rand, recordNumber)
+                //generateRecordDv(rowBytes, rand, new Unsigned16(recs))
+                //rowBytes(0) = recs.toByte
                 recordNumber.add(one)
                 rowBytes.copyToArray(key, 0, TeraInputFormat.KEY_LEN)
                 rowBytes.takeRight(TeraInputFormat.VALUE_LEN).copyToArray(value, 0, TeraInputFormat.VALUE_LEN)
-                (key, value)
+                //var keyr = key.map("%02X" format _).mkString("","","")
+                //val valuer = value.map { a => a.asInstanceOf[Long].toHexString }.mkString("","","")
+                (key ,value)
             }
         }
-
+        val firstrecord = dataset.take(1).toString
+        println(f"Dataset Generation Completed.  First Records = $firstrecord%s")
         storageType match {
             case "hdfs"  => dataset.saveAsNewAPIHadoopFile[TeraOutputFormat](outputFilePath)
             case "swift" => dataset.saveAsTextFile(outputFilePath) 
-            case _ => println("ERROR : need to provide storageType [swift,hdfs] ")
+            case "local"  => dataset.saveAsNewAPIHadoopFile[TeraOutputFormat](outputFilePath)
+            case _ => println("ERROR : need to provide storageType [swift,hdfs,local] ")
         }
         
 
         println("Number of records written: " + dataset.count())
     }
-
+    
+    // NumRecord * 100 Bytes/Record
     def sizeStrToBytes(str: String): Long = {
         val lower = str.toLowerCase
             if (lower.endsWith("k")) {
@@ -131,11 +142,13 @@ object teragen {
      */
     def generateRecord(recBuf: Array[Byte], rand: Unsigned16, recordNumber: Unsigned16): Unit = {
         // Generate the 10-byte key using the high 10 bytes of the 128-bit random number
+        
+        // grab the low order bytes first ...
         var i = 0
-            while (i < 10) {
-                recBuf(i) = rand.getByte(i)
-                    i += 1
-            }
+        while (i < 10) {
+            recBuf(i) = rand.getByte(15-i)
+                i += 1
+        }
 
         // Add 2 bytes of "break"
         recBuf(10) = 0x00.toByte
@@ -171,5 +184,13 @@ object teragen {
             recBuf(97) = 0xDD.toByte
             recBuf(98) = 0xEE.toByte
             recBuf(99) = 0xFF.toByte
+    
     }
+
+    def generateRecordDv(ary_in: Array[Byte], rand: Unsigned16, recordNumber: Unsigned16) : Unit = {
+       for(i <- 0 to 99) {
+          ary_in(i) = rand.getByte(0)
+       }
+    }
+    
 }

@@ -376,4 +376,6 @@ public class Random16 {
     rand.multiply(genArray[0].a);
     rand.add(genArray[0].c);
   }
+
+  
 }
