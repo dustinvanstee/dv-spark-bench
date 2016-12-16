@@ -29,10 +29,80 @@ import org.apache.log4j.Level
 
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd._
+import sys.process._
 //import org.apache.spark.{SparkConf, SparkContext}
 
-object teragen {
-    def write(sc : SparkContext, numberOfRecords : String,  outputFilePath : String,  storageType : String, numPartitions : Integer ) {
+
+import com.google.common.primitives.UnsignedBytes
+import dv.sparkbench.utils._
+
+
+object tgts {
+    implicit val caseInsensitiveOrdering = UnsignedBytes.lexicographicalComparator
+
+
+    def benchmark(sc : SparkContext, sizes : List[String], dd :String , sd : String, parts : Int, verbose : Boolean)  = {
+      // create an empty map
+      var runtimes = List[(String, String, Double,Double)]()
+      
+      for(i <- sizes ) {
+ 
+        val outputSizeInBytes = sizeStrToBytes(i)
+        val size = sizeToSizeStr(outputSizeInBytes)
+
+
+        val datadir = dd + "." + i
+        val sortdir = sd + "." + i
+        val tgentime  = utils.timeonly { teragen(sc, i, datadir, parts) }
+        val tsorttime = utils.timeonly { terasort(sc, datadir, sortdir) }
+
+        runtimes = runtimes ::: List((i,size,tgentime,tsorttime))
+        println(i)
+      }
+      
+      //runtimes foreach {case (key, value) => println (key + "-->" + value + " tg,ts (secs)")}
+      //runtimes foreach {case (key, value) => println (  "-->" ) }
+
+      println("===================== Benchmark Summary ====================================")
+      println("===========================================================================")
+      println ( f"NumRows\t\tDataSize\t\tTeragen\t\tTerasort") 
+      for (i <- runtimes ) {
+        val numrows = i._1
+        val size = i._2
+        val tgen = i._3
+        val tsort = i._4
+        println ( f"$numrows%10s    $size%10s    $tgen%2.2f    $tsort%2.2f") 
+      }
+      println("===========================================================================")
+      println("===========================================================================")
+     
+    }
+
+    def terasort(sc : SparkContext, inputFile: String, outputFile : String) : Unit = {
+        Logger.getLogger("org.apache.spark").setLevel(Level.WARN);
+        Logger.getLogger("org.eclipse.jetty.server").setLevel(Level.OFF);
+
+        // Process command line arguments
+        println("## Loading Data ## ")
+        val (dataset, loadtime) = utils.time { sc.newAPIHadoopFile[Array[Byte], Array[Byte], TeraInputFormat](inputFile) }
+
+        println("## Sorting Data ## ")
+        val (sorted,  sorttime) = utils.time { dataset.partitionBy(new TeraSortPartitioner(dataset.partitions.size)).sortByKey() }
+
+        println("## Writing Data ## ")
+        val (rc, writetime) = utils.time { sorted.saveAsNewAPIHadoopFile[TeraOutputFormat](outputFile) }
+        println("===================== TeraSort Summary ====================================")
+        println("===========================================================================")
+        println("sorttime  = " + sorttime)
+        println("loadtime  = " + loadtime)
+        println("writetime = " + writetime)
+        println("===========================================================================")
+        println("===========================================================================")
+
+    }
+
+
+    def teragen(sc : SparkContext, numberOfRecords : String,  outputFilePath : String, numPartitions : Integer )  = {
         Logger.getLogger("org.apache.spark").setLevel(Level.WARN);
         Logger.getLogger("org.eclipse.jetty.server").setLevel(Level.OFF);
 
@@ -87,17 +157,11 @@ object teragen {
                 (key ,value)
             }
         }
-        val firstrecord = dataset.take(1).toString
-        println(f"Dataset Generation Completed.  First Records = $firstrecord%s")
-        storageType match {
-            case "hdfs"  => dataset.saveAsNewAPIHadoopFile[TeraOutputFormat](outputFilePath)
-            case "swift" => dataset.saveAsTextFile(outputFilePath) 
-            case "local"  => dataset.saveAsNewAPIHadoopFile[TeraOutputFormat](outputFilePath)
-            case _ => println("ERROR : need to provide storageType [swift,hdfs,local] ")
-        }
-        
 
-        println("Number of records written: " + dataset.count())
+        val firstrecord = dataset.take(1).mkString("","","\n")
+        //println(f"Dataset Generation Completed.  First Records = $firstrecord%s")
+        dataset.saveAsNewAPIHadoopFile[TeraOutputFormat](outputFilePath)
+        //println("Number of records written: " + dataset.count())
     }
     
     // NumRecord * 100 Bytes/Record
