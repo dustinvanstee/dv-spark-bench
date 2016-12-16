@@ -57,7 +57,7 @@ object tgts {
         val tsorttime = utils.timeonly { terasort(sc, datadir, sortdir) }
 
         runtimes = runtimes ::: List((i,size,tgentime,tsorttime))
-        println(i)
+       
       }
       
       //runtimes foreach {case (key, value) => println (key + "-->" + value + " tg,ts (secs)")}
@@ -71,7 +71,7 @@ object tgts {
         val size = i._2
         val tgen = i._3
         val tsort = i._4
-        println ( f"$numrows%10s    $size%10s    $tgen%2.2f    $tsort%2.2f") 
+        println ( f"$numrows%-10s\t\t$size%-10s\t\t$tgen%2.2f\t\t$tsort%2.2f") 
       }
       println("===========================================================================")
       println("===========================================================================")
