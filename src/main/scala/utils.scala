@@ -21,6 +21,14 @@ object funcs {
       //println("Elapsed time: " + delta + "secs")
       delta
   }
+
+  def vprintln(s : String) (implicit verbose : Boolean) = {
+  	if(verbose) { 
+  		println(s)
+  	}
+  }
+
+
 }
   //def vb[R](block: => R): R = {
   //    val t0 = System.nanoTime()

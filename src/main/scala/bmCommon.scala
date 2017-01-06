@@ -5,11 +5,28 @@ package dv.sparkbench.bmc
 abstract class bmCommon {
 	type T
 	var paramList : List[T]
+	var runResults : List[T]
 
 	// Takes in a type of parameter, and returns the partameter with runTime included
 	def  run(s : T ) : T
-	def  addRun(t : T)
-    def  loop
 
+	def addRun(r : T) = {
+        this.paramList = this.paramList ::: List(r)
+    }
+
+    def  loop = {
+        //var ind = 1
+        this.paramList.foreach(s => {
+            //println("**** Iteration " + ind + " ****")
+            var tmp = s
+            tmp = this.run(s)
+            runResults = runResults ::: List(tmp)
+            //ind += 1
+        })
+    }
+
+    def printResults
+
+    
 
 }

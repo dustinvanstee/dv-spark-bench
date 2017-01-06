@@ -17,6 +17,8 @@ case class linearSettings(numExamples:Integer, numFeatures : Integer, epsilon : 
 
 class linearRegressionBenchmark(sc : SparkContext) extends bmCommon  {
     type T = linearSettings
+    implicit var verbose = false
+
 
     var paramList  = List[linearSettings]()
     var runResults = List[linearSettings]()
@@ -34,11 +36,11 @@ class linearRegressionBenchmark(sc : SparkContext) extends bmCommon  {
         val (lrModel,fitTime) = funcs.time { lr.fit(data) }
         // Predictions
         val (predicitons, predTime) = funcs.time {lrModel.transform(data)}
-        println(f"loadTime =$loadTime%2.2f secs")
+        funcs.vprintln(f"loadTime =$loadTime%2.2f secs")
 
-        println(f"loadTime = $loadTime%2.2f secs")
-        println(f"fitTime  = $fitTime%2.2f secs")
-        println(f"predTime = $predTime%2.2f secs")
+        funcs.vprintln(f"loadTime = $loadTime%2.2f secs")
+        funcs.vprintln(f"fitTime  = $fitTime%2.2f secs")
+        funcs.vprintln(f"predTime = $predTime%2.2f secs")
 
         //(loadTime,fitTime,predTime)
         val runtime = loadTime + fitTime + predTime
@@ -46,25 +48,28 @@ class linearRegressionBenchmark(sc : SparkContext) extends bmCommon  {
         t
     }
 
-    def loop = {
-        var ind = 1
-        this.paramList.foreach(s => {
-            println("**** Iteration " + ind + " ****")
-            var tmp = s
-            tmp = this.run(s)
-            runResults = runResults ::: List(tmp)
-            ind += 1
-        })
-    }
-
-    def addRun(r : linearSettings) = {
-        this.paramList = this.paramList ::: List(r)
-    }
+    //def loop = {
+    //    var ind = 1
+    //    this.paramList.foreach(s => {
+    //        println("**** Iteration " + ind + " ****")
+    //        var tmp = s
+    //        tmp = this.run(s)
+    //        runResults = runResults ::: List(tmp)
+    //        ind += 1
+    //    })
+    //}
+//
+    //def addRun(r : linearSettings) = {
+    //    this.paramList = this.paramList ::: List(r)
+    //}
+     // bc i cant override toString in linearSettings...
+   def setHeadString() = {println("numExamples,numFeatures,numPartitions,iterations,runtime") }
+   def setToString(a:linearSettings) = {println(a.numExamples + "," + a.numFeatures + "," + a.numPartitions + "," + a.iterations + "," + a.runtime) }
 
 
   def printResults = {
-    linearRegressionBenchmark.lsHeadString
-    runResults.foreach(li => linearRegressionBenchmark.lsToString(li)) 
+    this.setHeadString
+    runResults.foreach(li => this.setToString(li)) 
   }
 
 }
@@ -78,9 +83,6 @@ object linearRegressionBenchmark {
         println("Test run =" + test.run(ts))
     }
 
-     // bc i cant override toString in linearSettings...
-   def lsHeadString() = {println("numExamples,numFeatures,numPartitions,iterations,runtime") }
-   def lsToString(a:linearSettings) = {println(a.numExamples + "," + a.numFeatures + "," + a.numPartitions + "," + a.iterations + "," + a.runtime) }
 
 }
  

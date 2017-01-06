@@ -19,3 +19,7 @@ project/plugins/project/
 # ENSIME specific
 .ensime_cache/
 .ensime
+
+src/main/scala/tgts.scala.working
+
+src/main/scala/tgts.scala.latest

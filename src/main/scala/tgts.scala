@@ -21,9 +21,7 @@
 */
 
 package dv.sparkbench.terasort
-import src.main.java.Unsigned16
-import src.main.java.Random16
-import src.main.scala._
+
 import org.apache.log4j.Logger
 import org.apache.log4j.Level
 
@@ -32,76 +30,63 @@ import org.apache.spark.rdd._
 import sys.process._
 //import org.apache.spark.{SparkConf, SparkContext}
 
-
+// Custom framework
 import com.google.common.primitives.UnsignedBytes
-import dv.sparkbench.utils._
+import dv.sparkbench.utils.{funcs}
 import dv.sparkbench.bmc._
 
+// Custom 
+import src.main.java.Unsigned16
+import src.main.java.Random16
+import src.main.scala._
+
+//runsizes, datadir, sortdir, partitions
+case class teraSettings(nrows :String, inputDir : String, outputDir : String, numPartitions : Integer,  runtime : Double = -999999)
+
+
+class tgts( sc : SparkContext ) extends bmCommon {
+    // made this implicit so i dont have to pass to vprint all the time
+    implicit var verbose = false
+    type T = teraSettings
+
+    var paramList  = List[teraSettings]()
+    var runResults = List[teraSettings]()
+
+    //, verbose : Boolean
+
+    def run( s : teraSettings) : teraSettings = {
+
+        val outputSizeInBytes = tgts.sizeStrToBytes(s.nrows)
+        val size = tgts.sizeToSizeStr(outputSizeInBytes)
+
+
+        val datadir = s.inputDir + "." + s.nrows
+        val sortdir = s.outputDir  + "." + s.nrows
+        val tgentime  = funcs.timeonly { tgts.teragen(sc,  s.nrows , s.inputDir, s.numPartitions) }
+        val tsorttime = funcs.timeonly { tgts.terasort(sc, s.inputDir, s.outputDir) }
+        
+        funcs.vprintln("Tgen time =  " + tgentime)
+        funcs.vprintln("Tsort time = " + tsorttime)
+        //(loadTime,fitTime,predTime)
+        val runtime = tgentime + tsorttime
+        val t = s.copy(runtime = runtime)
+        t
+       
+      }
+
+    def setHeadString() = {println("nrows,size,numPartitions,runtime") }
+    def setToString(a:teraSettings) = {println(a.nrows + "," + tgts.sizeToSizeStr(tgts.sizeStrToBytes(a.nrows)) + "," + a.numPartitions + "," + a.runtime) }
+
+    def printResults = {
+        this.setHeadString
+        runResults.foreach(li => this.setToString(li)) 
+    }
+
+}
 
 object tgts {
     implicit val caseInsensitiveOrdering = UnsignedBytes.lexicographicalComparator
-
-
-    def benchmark(sc : SparkContext, sizes : List[String], dd :String , sd : String, parts : Int, verbose : Boolean)  = {
-      // create an empty map
-      var runtimes = List[(String, String, Double,Double)]()
-      
-      for(i <- sizes ) {
- 
-        val outputSizeInBytes = sizeStrToBytes(i)
-        val size = sizeToSizeStr(outputSizeInBytes)
-
-
-        val datadir = dd + "." + i
-        val sortdir = sd + "." + i
-        val tgentime  = funcs.timeonly { teragen(sc, i, datadir, parts) }
-        val tsorttime = funcs.timeonly { terasort(sc, datadir, sortdir) }
-
-        runtimes = runtimes ::: List((i,size,tgentime,tsorttime))
-       
-      }
-      
-      //runtimes foreach {case (key, value) => println (key + "-->" + value + " tg,ts (secs)")}
-      //runtimes foreach {case (key, value) => println (  "-->" ) }
-
-      println("===================== Benchmark Summary ====================================")
-      println("===========================================================================")
-      println ( f"NumRows\t\tDataSize\t\tTeragen\t\tTerasort") 
-      for (i <- runtimes ) {
-        val numrows = i._1
-        val size = i._2
-        val tgen = i._3
-        val tsort = i._4
-        println ( f"$numrows%-10s\t\t$size%-10s\t\t$tgen%2.2f\t\t$tsort%2.2f") 
-      }
-      println("===========================================================================")
-      println("===========================================================================")
-     
-    }
-
-    def terasort(sc : SparkContext, inputFile: String, outputFile : String) : Unit = {
-        Logger.getLogger("org.apache.spark").setLevel(Level.WARN);
-        Logger.getLogger("org.eclipse.jetty.server").setLevel(Level.OFF);
-
-        // Process command line arguments
-        println("## Loading Data ## ")
-        val (dataset, loadtime) = funcs.time { sc.newAPIHadoopFile[Array[Byte], Array[Byte], TeraInputFormat](inputFile) }
-
-        println("## Sorting Data ## ")
-        val (sorted,  sorttime) = funcs.time { dataset.partitionBy(new TeraSortPartitioner(dataset.partitions.size)).sortByKey() }
-
-        println("## Writing Data ## ")
-        val (rc, writetime) = funcs.time { sorted.saveAsNewAPIHadoopFile[TeraOutputFormat](outputFile) }
-        println("===================== TeraSort Summary ====================================")
-        println("===========================================================================")
-        println("sorttime  = " + sorttime)
-        println("loadtime  = " + loadtime)
-        println("writetime = " + writetime)
-        println("===========================================================================")
-        println("===========================================================================")
-
-    }
-
+    implicit var verbose = false
 
     def teragen(sc : SparkContext, numberOfRecords : String,  outputFilePath : String, numPartitions : Integer )  = {
         Logger.getLogger("org.apache.spark").setLevel(Level.WARN);
@@ -118,14 +103,14 @@ object tgts {
         val recordsPerPartition = outputSizeInBytes / 100 / parts
         
         //val numRecords= outputSizeInBytes * parts
-        println("===========================================================================")
-        println("===========================================================================")
-        println(s"Input size: $size")
-        println(f"Total number of records: $numberOfRecords%s")
-        println(s"Number of output partitions: $parts")
-        println(s"Number of records/ partition:   $recordsPerPartition")
-        println("===========================================================================")
-        println("===========================================================================")
+        funcs.vprintln("===========================================================================")
+        funcs.vprintln("===========================================================================")
+        funcs.vprintln(s"Input size: $size")
+        funcs.vprintln(f"Total number of records: $numberOfRecords%s")
+        funcs.vprintln(s"Number of output partitions: $parts")
+        funcs.vprintln(s"Number of records/ partition:   $recordsPerPartition")
+        funcs.vprintln("===========================================================================")
+        funcs.vprintln("===========================================================================")
 
         assert(recordsPerPartition < Int.MaxValue, s"records per partition > ${Int.MaxValue}")
 
@@ -164,6 +149,34 @@ object tgts {
         dataset.saveAsNewAPIHadoopFile[TeraOutputFormat](outputFilePath)
         //println("Number of records written: " + dataset.count())
     }
+
+    def terasort(sc : SparkContext, inputFile: String, outputFile : String) : Unit = {
+        Logger.getLogger("org.apache.spark").setLevel(Level.WARN);
+        Logger.getLogger("org.eclipse.jetty.server").setLevel(Level.OFF);
+
+        // Process command line arguments
+        funcs.vprintln("## Loading Data ## ")
+        val (dataset, loadtime) = funcs.time { sc.newAPIHadoopFile[Array[Byte], Array[Byte], TeraInputFormat](inputFile) }
+        //val loadtime = 0
+        //val dataset  = sc.newAPIHadoopFile[Array[Byte], Array[Byte], TeraInputFormat](inputFile) 
+
+        funcs.vprintln("## Sorting Data ## ")
+        val (sorted,  sorttime) = funcs.time { dataset.partitionBy(new TeraSortPartitioner(dataset.partitions.size)).sortByKey() }
+        //val sorttime = 0
+        //val sorted = dataset.partitionBy(new TeraSortPartitioner(dataset.partitions.size)).sortByKey() 
+
+        funcs.vprintln("## Writing Data ## ")
+        val (rc, writetime) = funcs.time { sorted.saveAsNewAPIHadoopFile[TeraOutputFormat](outputFile) }
+        funcs.vprintln("===================== TeraSort Summary ====================================")
+        funcs.vprintln("===========================================================================")
+        funcs.vprintln("sorttime  = " + sorttime)
+        funcs.vprintln("loadtime  = " + loadtime)
+        funcs.vprintln("writetime = " + writetime)
+        funcs.vprintln("===========================================================================")
+        funcs.vprintln("===========================================================================")
+
+    }
+
     
     // NumRecord * 100 Bytes/Record
     def sizeStrToBytes(str: String): Long = {
