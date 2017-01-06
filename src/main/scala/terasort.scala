@@ -34,31 +34,5 @@ import dv.sparkbench.utils._
  */
 object terasort {
 
-    implicit val caseInsensitiveOrdering = UnsignedBytes.lexicographicalComparator
 
-    def sort(sc : SparkContext, inputFile: String, outputFile : String) : Unit = {
-        Logger.getLogger("org.apache.spark").setLevel(Level.WARN);
-        Logger.getLogger("org.eclipse.jetty.server").setLevel(Level.OFF);
-
-        // Process command line arguments
-        println("## Loading Data ## ")
-        val (dataset, loadtime) = utils.time { sc.newAPIHadoopFile[Array[Byte], Array[Byte], TeraInputFormat](inputFile) }
-
-        println("## Sorting Data ## ")
-        val (sorted,  sorttime) = utils.time { dataset.partitionBy(new TeraSortPartitioner(dataset.partitions.size)).sortByKey() }
-
-        println("## Writing Data ## ")
-        val (rc, writetime) = utils.time { sorted.saveAsNewAPIHadoopFile[TeraOutputFormat](outputFile) }
-        println("===================== TeraSort Summary ====================================")
-        println("===========================================================================")
-        println("sorttime  = " + sorttime)
-        println("loadtime  = " + loadtime)
-        println("writetime = " + writetime)
-        println("===========================================================================")
-        println("===========================================================================")
-
-
-
-
-    }
 }

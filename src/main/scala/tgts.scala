@@ -35,6 +35,7 @@ import sys.process._
 
 import com.google.common.primitives.UnsignedBytes
 import dv.sparkbench.utils._
+import dv.sparkbench.bmc._
 
 
 object tgts {
@@ -53,8 +54,8 @@ object tgts {
 
         val datadir = dd + "." + i
         val sortdir = sd + "." + i
-        val tgentime  = utils.timeonly { teragen(sc, i, datadir, parts) }
-        val tsorttime = utils.timeonly { terasort(sc, datadir, sortdir) }
+        val tgentime  = funcs.timeonly { teragen(sc, i, datadir, parts) }
+        val tsorttime = funcs.timeonly { terasort(sc, datadir, sortdir) }
 
         runtimes = runtimes ::: List((i,size,tgentime,tsorttime))
        
@@ -84,13 +85,13 @@ object tgts {
 
         // Process command line arguments
         println("## Loading Data ## ")
-        val (dataset, loadtime) = utils.time { sc.newAPIHadoopFile[Array[Byte], Array[Byte], TeraInputFormat](inputFile) }
+        val (dataset, loadtime) = funcs.time { sc.newAPIHadoopFile[Array[Byte], Array[Byte], TeraInputFormat](inputFile) }
 
         println("## Sorting Data ## ")
-        val (sorted,  sorttime) = utils.time { dataset.partitionBy(new TeraSortPartitioner(dataset.partitions.size)).sortByKey() }
+        val (sorted,  sorttime) = funcs.time { dataset.partitionBy(new TeraSortPartitioner(dataset.partitions.size)).sortByKey() }
 
         println("## Writing Data ## ")
-        val (rc, writetime) = utils.time { sorted.saveAsNewAPIHadoopFile[TeraOutputFormat](outputFile) }
+        val (rc, writetime) = funcs.time { sorted.saveAsNewAPIHadoopFile[TeraOutputFormat](outputFile) }
         println("===================== TeraSort Summary ====================================")
         println("===========================================================================")
         println("sorttime  = " + sorttime)

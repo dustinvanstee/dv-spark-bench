@@ -1,6 +1,6 @@
 package dv.sparkbench.utils
 
-object utils {
+object funcs {
 
   // This function returns whatever the original function returns, plus the time in a Tuple
   def time[R](block: => R): (R,Double) = {
@@ -21,7 +21,7 @@ object utils {
       //println("Elapsed time: " + delta + "secs")
       delta
   }
-
+}
   //def vb[R](block: => R): R = {
   //    val t0 = System.nanoTime()
   //    val result = block    // call-by-name
@@ -32,7 +32,4 @@ object utils {
   //}
 //
 
-  case class linearSettings(numExamples:Integer, numFeatures : Integer, epsilon : Double, numPartitions : Integer, intercept : Double, iterations : Integer)
-
-
-}
+  
