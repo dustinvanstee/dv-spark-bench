@@ -48,7 +48,7 @@ class tgts( sc : SparkContext ) extends bmCommon {
     // made this implicit so i dont have to pass to vprint all the time
     implicit var verbose = false
     type T = teraSettings
-
+    val tmp = 0
     var paramList  = List[teraSettings]()
     var runResults = List[teraSettings]()
 
