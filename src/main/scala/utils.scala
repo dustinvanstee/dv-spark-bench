@@ -31,7 +31,7 @@ object funcs {
   }
 
 
-  def connectToSwift(sc : SparkContext,  credentials : scala.collection.mutable.HashMap[String, String]) : Unit = {
+  def swiftConnection(sc : SparkContext,  credentials : scala.collection.mutable.HashMap[String, String]) : Unit = {
     val pfx = "fs.swift.service." + credentials("name") 
     
     val conf = sc.hadoopConfiguration
