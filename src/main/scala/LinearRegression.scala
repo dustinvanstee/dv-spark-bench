@@ -74,15 +74,15 @@ class linearRegressionBenchmark(sc : SparkContext) extends bmCommon  {
 
 }
 
-object linearRegressionBenchmark {
-    def main(args: Array[String]) {
-        val sc = new SparkContext
-        val test = new linearRegressionBenchmark(sc)
-        val ts = new linearSettings(numExamples=200, numFeatures=200, epsilon=0.5, numPartitions=10, intercept=1, iterations=15)
-      
-        println("Test run =" + test.run(ts))
-    }
-
-
-}
+//object linearRegressionBenchmark {
+//    def main(args: Array[String]) {
+//        val sc = new SparkContext
+//        val test = new linearRegressionBenchmark(sc)
+//        val ts = new linearSettings(numExamples=200, numFeatures=200, epsilon=0.5, numPartitions=10, intercept=1, iterations=15)
+//      
+//        println("Test run =" + test.run(ts))
+//    }
+//
+//
+//}
  
