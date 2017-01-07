@@ -31,7 +31,6 @@ assemblyMergeStrategy in assembly := {
   case PathList("org", "apache", "spark", xs @ _*)         => MergeStrategy.first
   case PathList("org", "apache", xs @ _*)         => MergeStrategy.first
   case PathList("javax", "xml", xs @ _*)         => MergeStrategy.first
-  case PathList("com", "google", xs @ _*)         => MergeStrategy.first
   case PathList("com", "esotericsoftware", xs @ _*)         => MergeStrategy.first
   case PathList(ps @ _*) if ps.last endsWith ".html" => MergeStrategy.first
   case "application.conf"                            => MergeStrategy.concat
@@ -40,23 +39,11 @@ assemblyMergeStrategy in assembly := {
     val oldStrategy = (assemblyMergeStrategy in assembly).value
     oldStrategy(x)
 }
+//  case PathList("com", "google", xs @ _*)         => MergeStrategy.first
 
 
   //case PathList("scala", xs @ _*) => MergeStrategy.discard
 
 assemblyOption in assembly := (assemblyOption in assembly).value.copy(includeScala = false)
 
-   //libraryDependencies ++= Seq(
-    //  "org.apache.spark" %% "spark-core" % "0.8.0-incubating" % "provided",
-    //  "org.apache.hadoop" % "hadoop-client" % "2.0.0-cdh4.4.0" % "provided"
-    //)
-
-
- //"org.apache.spark" %% "spark-core" % "1.3.1" % "provided",
- // "org.apache.spark" %% "spark-sql" % "1.3.1",
- // "org.apache.spark" %% "spark-hive" % "1.3.1",
- // "org.apache.spark" %% "spark-streaming" % "1.3.1",
- // "org.apache.spark" %% "spark-streaming-kafka" % "1.3.1",
- // "org.apache.spark" %% "spark-streaming-flume" % "1.3.1",
- // "org.apache.spark" %% "spark-mllib" % "1.3.1",
-
+  

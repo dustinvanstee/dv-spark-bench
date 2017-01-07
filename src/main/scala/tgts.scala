@@ -27,7 +27,7 @@ import org.apache.log4j.Level
 
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd._
-import sys.process._
+//import sys.process._
 //import org.apache.spark.{SparkConf, SparkContext}
 
 // Custom framework
