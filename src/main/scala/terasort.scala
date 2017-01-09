@@ -61,20 +61,24 @@ class tgts( sc : SparkContext ) extends bmCommon {
 
         val datadir = s.inputDir + "." + s.nrows
         val sortdir = s.outputDir  + "." + s.nrows
+        funcs.vprintln("Generating Data")
         val tgentime  = funcs.timeonly { tgts.teragen(sc,  s.nrows , s.inputDir, s.numPartitions) }
+        funcs.vprintln("Sorting Data")
         val tsorttime = funcs.timeonly { tgts.terasort(sc, s.inputDir, s.outputDir) }
+        funcs.vprintln("Clearing** Data")
+        // Now remove all the junk data you created
+        val cleartime = funcs.timeonly { tgts.clearData(sc, s.inputDir, s.outputDir, s.numPartitions) }
         
-        funcs.vprintln("Tgen time =  " + tgentime)
-        funcs.vprintln("Tsort time = " + tsorttime)
+        funcs.vprintln("Data gen time : " + tgentime + "(s) //// Sort time : " + tsorttime + "(s) //// Cleartime : "+cleartime+ "(s)")
         //(loadTime,fitTime,predTime)
-        val runtime = tgentime + tsorttime
+        val runtime =  tsorttime
         val t = s.copy(runtime = runtime)
         t
        
       }
 
-    def setHeadString() = {println("nrows,size,numPartitions,runtime") }
-    def setToString(a:teraSettings) = {println(a.nrows + "," + tgts.sizeToSizeStr(tgts.sizeStrToBytes(a.nrows)) + "," + a.numPartitions + "," + a.runtime) }
+    def setHeadString() = {println("label,nrows,size,numPartitions,runtime") }
+    def setToString(a:teraSettings) = {println(this.runLabel + "," + a.nrows + "," + tgts.sizeToSizeStr(tgts.sizeStrToBytes(a.nrows)) + "," + a.numPartitions + "," + a.runtime) }
 
     def printResults = {
         this.setHeadString
@@ -176,6 +180,22 @@ object tgts {
 
     }
 
+    // Used to overwrite largefiles generated
+    def clearData(sc : SparkContext, inputFile: String, outputFile : String, numPartitions : Integer ) : Unit = {
+        val dataset = sc.parallelize(1 to numPartitions, numPartitions).mapPartitionsWithIndex { case (index, _) =>
+            val key = new Array[Byte](2)
+            val value = new Array[Byte](2)       
+            Iterator.tabulate(2) { offset =>
+                (key ,value)
+            }
+        }
+        // Overwrite files with small files.  Couldnt figure out the rm command for object store ..
+        dataset.saveAsNewAPIHadoopFile[TeraOutputFormat](inputFile)
+        dataset.saveAsNewAPIHadoopFile[TeraOutputFormat](outputFile)
+ 
+    }
+
+ 
     
     // NumRecord * 100 Bytes/Record
     def sizeStrToBytes(str: String): Long = {

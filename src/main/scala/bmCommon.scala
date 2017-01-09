@@ -6,6 +6,7 @@ abstract class bmCommon {
 	type T
 	var paramList : List[T]
 	var runResults : List[T]
+	var runLabel = "na"
 
 	// Takes in a type of parameter, and returns the partameter with runTime included
 	def  run(s : T ) : T
@@ -23,6 +24,10 @@ abstract class bmCommon {
             runResults = runResults ::: List(tmp)
             //ind += 1
         })
+    }
+
+    def setRunLabel(s : String) = {
+    	runLabel = s
     }
 
     def printResults

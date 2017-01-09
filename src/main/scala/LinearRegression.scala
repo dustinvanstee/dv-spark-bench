@@ -63,8 +63,8 @@ class linearRegressionBenchmark(sc : SparkContext) extends bmCommon  {
     //    this.paramList = this.paramList ::: List(r)
     //}
      // bc i cant override toString in linearSettings...
-   def setHeadString() = {println("numExamples,numFeatures,numPartitions,iterations,runtime") }
-   def setToString(a:linearSettings) = {println(a.numExamples + "," + a.numFeatures + "," + a.numPartitions + "," + a.iterations + "," + a.runtime) }
+   def setHeadString() = {println("label,numExamples,numFeatures,numPartitions,iterations,runtime") }
+   def setToString(a:linearSettings) = {println(this.runLabel + "," + a.numExamples + "," + a.numFeatures + "," + a.numPartitions + "," + a.iterations + "," + a.runtime) }
 
 
   def printResults = {
