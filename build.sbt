@@ -10,40 +10,23 @@ libraryDependencies += "org.apache.spark" %% "spark-mllib" % "1.6.0" % "provided
 libraryDependencies += "org.apache.spark" %% "spark-sql" % "1.6.0" % "provided"
 libraryDependencies += "org.apache.hadoop" % "hadoop-client" % "2.3.0" % "provided"
 
-//resolvers ++= Seq(
-//  "JBoss Repository" at "http://repository.jboss.org/nexus/content/repositories/releases/",
-//  "Spray Repository" at "http://repo.spray.cc/",
-//  "Cloudera Repository" at "https://repository.cloudera.com/artifactory/cloudera-repos/",
-//  "Akka Repository" at "http://repo.akka.io/releases/",
-//  "Twitter4J Repository" at "http://twitter4j.org/maven2/",
-//  "Apache HBase" at "https://repository.apache.org/content/repositories/releases",
-//  "Twitter Maven Repo" at "http://maven.twttr.com/",
-//  "scala-tools" at "https://oss.sonatype.org/content/groups/scala-tools",
-//  "sonatype-releases" at "https://oss.sonatype.org/content/repositories/releases/",
-//  "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/",
-//  "Second Typesafe repo" at "http://repo.typesafe.com/typesafe/maven-releases/",
-//  "Mesosphere Public Repository" at "http://downloads.mesosphere.io/maven",
-//  Resolver.sonatypeRepo("public")
-//)
-
+// This is for times where dependencies are called multiple times
 assemblyMergeStrategy in assembly := {
-  case PathList("org", "apache", "hadoop", xs @ _*)         => MergeStrategy.first
+  case PathList("org", "apache", "hadoop", xs @ _*)        => MergeStrategy.first
   case PathList("org", "apache", "spark", xs @ _*)         => MergeStrategy.first
-  case PathList("org", "apache", xs @ _*)         => MergeStrategy.first
-  case PathList("javax", "xml", xs @ _*)         => MergeStrategy.first
-  case PathList("com", "esotericsoftware", xs @ _*)         => MergeStrategy.first
-  case PathList(ps @ _*) if ps.last endsWith ".html" => MergeStrategy.first
-  case "application.conf"                            => MergeStrategy.concat
-  case "unwanted.txt"                                => MergeStrategy.discard
+  case PathList("com", "google", xs @ _*)                  => MergeStrategy.first
+  case PathList("org", "apache", xs @ _*)                  => MergeStrategy.first
+  case PathList("javax", "xml", xs @ _*)                   => MergeStrategy.first
+  case PathList("com", "esotericsoftware", xs @ _*)        => MergeStrategy.first
+  case PathList(ps @ _*) if ps.last endsWith ".html"       => MergeStrategy.first
+  case "application.conf"                                  => MergeStrategy.concat
+  case "unwanted.txt"                                      => MergeStrategy.discard
   case x =>
     val oldStrategy = (assemblyMergeStrategy in assembly).value
     oldStrategy(x)
 }
-//  case PathList("com", "google", xs @ _*)         => MergeStrategy.first
 
-
-  //case PathList("scala", xs @ _*) => MergeStrategy.discard
-
+//Important line below.  This strips out all the scala dependencies and shrinks down your jar into skinny jar
 assemblyOption in assembly := (assemblyOption in assembly).value.copy(includeScala = false)
 
   
